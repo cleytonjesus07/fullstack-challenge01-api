@@ -60,6 +60,7 @@ router.get('/login', async (ctx) => {
 
 router.get("/tweets", async (ctx) => {
     /* Buscar todos os tweets */
+    console.log("Hoje estou zuero.")
     const token = ctx.request.headers?.authorization?.split(" ")[1] || undefined;
     if (typeof token === "undefined") {
         ctx.status = 401;
@@ -67,8 +68,13 @@ router.get("/tweets", async (ctx) => {
     }
 
     try {
-        const tweets = (decodeToken(token)) && await prisma.tweet.findMany();
-        ctx.body = tweets;
+        console.log("JWT")
+        const tweets = (decodeToken(token)) && await prisma.tweet.findMany({include:{user:true}});
+        const newArr_tweets = tweets.map((tweet)=>{
+            delete tweet.user.password
+            return tweet;
+        });
+        ctx.body = newArr_tweets;
     } catch (error) {
         ctx.status = 500;
         return;
